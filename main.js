@@ -8,19 +8,26 @@ let options = {
   redirect: "follow"
 };
 
-let fetchUrl = "https://api.github.com/users/ktran050/repos";
-
 // fetches all repositories when given a username
 function fetchRepos(username) {
+  let fetchUrl = `https://api.github.com/users/${username}/repos`;
+  let someArr = [];
   fetch(fetchUrl, options)
     .then(function(result) {
       if (!result.ok) {
+        $("#results").html("<p>ERROR: user not found</p>");
         throw new Error("result not ok");
+      } else {
+        return result.text();
       }
-      return result.text();
     })
     .then(function(result) {
-      console.log(result);
+      let someArr = JSON.parse(result);
+      let resultsHMTL = "";
+      for (let i = 0; i < someArr.length; ++i) {
+        resultsHMTL += `<li>${someArr[i].full_name}<a href="${someArr[i].html_url}">link</a></li>`;
+      }
+      $("#results").html(resultsHMTL);
     })
     .catch(function(error) {
       console.log("error", error);
@@ -32,8 +39,6 @@ function handleFormSubmit() {
   $("#form").on("click", "#submit", function(event) {
     event.preventDefault();
     let userInput = $("#username").val();
-    console.log("form submit handled");
-    console.log(`user input: ${userInput}`);
     fetchRepos(userInput);
   });
 }
